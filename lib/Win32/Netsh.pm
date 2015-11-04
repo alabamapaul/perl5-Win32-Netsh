@@ -17,9 +17,9 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Win32::Netsh;
+  use Win32::Netsh qw(netsh);
   
-  my $response = win32_netsh(qq{wlan}, qq{show}, qq{interfaces});
+  my $response = netsh(qq{wlan}, qq{show}, qq{interfaces});
 
 =cut
 
@@ -28,9 +28,70 @@ Version 0.01
 use strict;
 use warnings;
 use 5.010;
+use Exporter::Easy (
+  EXPORT => [qw(netsh)],
+  );
 
 ## Version string
 our $VERSION = qq{0.01};
 
+##****************************************************************************
+##****************************************************************************
 
-1;
+=head2 netsh(...)
+
+=over 2
+
+=item B<Description>
+
+Run the netsh command line utility with the provided arguments
+
+=item B<Parameters>
+
+... - Variable number of arguments
+
+=item B<Return>
+
+SCALAR - String captured from the standard out of the command
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub netsh ## no critic (RequireArgUnpacking)
+{
+  my $command = qq{netsh};
+
+  ## Build the command
+  foreach my $arg (@_)
+  {
+    $command .= qq{ } . $arg;
+  }
+  
+  ## Execute command and capture output
+  my $result = qx{$command};  ## no critic (ProhibitBacktick)
+  
+  ## return the result
+  return($result);
+}
+
+##****************************************************************************
+## Additional POD documentation
+##****************************************************************************
+
+=head1 AUTHOR
+
+Paul Durden E<lt>alabamapaul AT gmail.comE<gt>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright (C) 2015 by Paul Durden.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+
+1;    ## End of module
+__END__
