@@ -17,7 +17,7 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Win32::Netsh qw(netsh);
+  use Win32::Netsh;
   
   my $response = netsh(qq{wlan}, qq{show}, qq{interfaces});
 
