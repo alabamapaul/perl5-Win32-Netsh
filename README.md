@@ -8,6 +8,13 @@ The intent is to create additional modules based on the various netsh contexts.
 
 ## Modules
 
-### Win32::Netsh::WLAN 
+### Win32::Netsh::Utils 
+This module provides functions used by various other Win32::Netsh modules.
+
+### Win32::Netsh::Interface 
+This module provides functions for working with the netsh interface context.
+
+### Win32::Netsh::Wlan 
 This module provides functions for working with the netsh wlan context for 
 wireless networking
+
