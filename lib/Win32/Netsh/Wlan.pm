@@ -38,10 +38,12 @@ use Exporter::Easy (
   OK =>
     [qw(wlan_list_interfaces wlan_profile_list wlan_profile_info wlan_debug)],
   TAGS => [
-    debug     => [qw(wlan_debug),],
-    profile   => [qw(wlan_profile_list wlan_profile_info)],
+    debug   => [qw(wlan_debug),],
+    profile => [
+      qw(wlan_last_error wlan_profile_list wlan_profile_info wlan_profile_add wlan_profile_delete)
+    ],
     interface => [qw(wlan_list_interfaces)],
-    all       => [qw(:debug :profile :interface),],
+    all       => [qw(wlan_last_error :debug :profile :interface),],
   ],
 );
 
@@ -50,6 +52,7 @@ our $VERSION = qq{0.01};
 
 my $debug = 0;
 
+my $wlan_error = qq{};
 ##-------------------------------------------------
 ##-------------------------------------------------
 Readonly::Scalar my $WLAN_IF_KEY_LOOKUP => {
@@ -380,6 +383,137 @@ PROFILE_INFO_PARSE_LOOP:
     print(Data::Dumper->Dump([$info,], [qw(info),]), qq{\n});
   }
   return ($info);
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 wlan_profile_add($filename, $options)
+
+=over 2
+
+=item B<Description>
+
+Add the given profile with the specified options. If no options are provided
+then the profile will be added for all interfaces and all users
+
+=item B<Parameters>
+
+$filename - Filename of the XML file containing the wireless profiles
+$options  - Optional hash reference with the following keys:
+  interface - Name of the interface for the profile
+  user      - User scope (all or current)
+
+=item B<Return>
+
+UNDEF on error, or 1 for success
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_profile_add
+{
+  my $filename = shift;
+  my $options = shift // {};
+  ## Reset the module error message
+  $wlan_error = qq{};
+
+  my $command = qq{wlan add profile filename="$filename"};
+  $command .= qq{ user=$options->{user}}             if ($options->{user});
+  $command .= qq{ interface="$options->{interface}"} if ($options->{interface});
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  return (1) if ($response =~ /\A Profile \s (.*) \s is \s added/x);
+
+  ## Set the module error message
+  $wlan_error = str_trim($response);
+
+  return;
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 wlan_profile_delete($name)
+
+=over 2
+
+=item B<Description>
+
+Delete the specified profile if it exists
+
+=item B<Parameters>
+
+$name - name of the profile to delete
+
+=item B<Return>
+
+UNDEF on error, or 1 for success
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_profile_delete
+{
+  my $name = shift;
+
+  ## Reset the module error message
+  $wlan_error = qq{};
+
+  return unless (defined($name));
+
+  my $command  = qq{wlan delete profile name="$name"};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  return (1) if ($response =~ /\A Profile \s "(.*)" \s is \s deleted/x);
+
+  ## Set the module error message
+  $wlan_error = str_trim($response);
+
+  return;
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 wlan_last_error()
+
+=over 2
+
+=item B<Description>
+
+Return the error string associated with the last command
+
+=item B<Parameters>
+
+NONE
+
+=item B<Return>
+
+NONE
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_last_error
+{
+  return ($wlan_error);
 }
 
 ##****************************************************************************
