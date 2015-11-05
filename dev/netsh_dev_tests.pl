@@ -29,17 +29,31 @@ use Win32::Netsh::Interface qq(:all);
 
 
 wlan_debug(3);
-
-wlan_list_interfaces();
-
 interface_debug(3);
 
-interface_ipv4_info(qq{Local Area Connection 2});
+if (0)
+{
+  wlan_list_interfaces();
+  
+  
+  interface_ipv4_info(qq{Local Area Connection 2});
+  
+  interface_ipv4_info(qq{Wireless Network Connection});
+  
+  interface_ipv4_info(qq{BOGUS});
+  
+  interface_ipv4_info_all();
 
-interface_ipv4_info(qq{Wireless Network Connection});
+}
 
-interface_ipv4_info(qq{BOGUS});
+wlan_profile_list();
 
-interface_ipv4_info_all();
-
+wlan_debug(0);
+foreach my $profile (qw(Wireless_ESS Bogus))
+{
+    print(qq{Profile: "$profile" }, 
+    (wlan_profile_info($profile) ? qq{exists} : qq{does not exist}),
+    qq{\n});
+}
+  
 __END__
