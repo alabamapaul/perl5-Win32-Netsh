@@ -267,6 +267,8 @@ sub interface_ipv4_info
 {
   my $name = shift // qq{};
 
+  print(qq{interface_ipv4_info()\n}) if ($debug);
+  
   my $command  = qq{interface ipv4 show addresses name="$name"};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -342,6 +344,8 @@ sub interface_ipv4_info_all
   my $lines = [];
   my $all   = [];
 
+  print(qq{interface_ipv4_info_all()\n}) if ($debug);
+  
   my $command  = qq{interface ipv4 show addresses};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -388,10 +392,92 @@ SCALAR - Error string
 =cut
 
 ##----------------------------------------------------------------------------
-sub wlan_last_error
+sub interface_last_error
 {
-  return ($wlan_error);
+  return ($interface_error);
 }
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 interface_info_all()
+
+=over 2
+
+=item B<Description>
+
+Return an reference to an array of hash references with interface information
+
+=item B<Parameters>
+
+NONE
+
+=item B<Return>
+
+ARRAY reference of hash references whose keys are as follows:
+
+=over 4
+
+=item I<name>
+
+Name of the interface
+
+=item I<enabled>
+
+Boolean indicating if the administrative state is enabled
+
+=item I<state>
+
+Indicates the connections state as Connected or Disconnected
+
+=item I<type>
+
+Indicates the type of interface
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub interface_info_all
+{
+  my $all = [];
+  my $info;
+
+  print(qq{interface_info_all()\n}) if ($debug);
+  
+  my $command  = qq{interface show interface};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  foreach my $line (split(qq{\n}, $response))
+  {
+    if ($line =~ /\A(Enabled|Disabled)\s+(.*)\s+(.*)\s+(.*)\Z/x)
+    {
+      my $info = {
+        enabled => ((uc($1) eq qq{ENABLED}) ? 1 : 0),
+        state   => $2,
+        type    => $3,
+        name    => str_trim($4),
+      };
+      
+      push(@{$all}, $info);
+    }
+  }
+
+  if ($debug >= 2)
+  {
+    print(Data::Dumper->Dump([$all,], [qw(all),]), qq{\n});
+  }
+  return ($all);
+}
+
 
 ##****************************************************************************
 ## Additional POD documentation
