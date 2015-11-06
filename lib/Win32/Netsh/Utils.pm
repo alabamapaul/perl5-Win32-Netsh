@@ -46,6 +46,14 @@ Readonly::Scalar my $IP_OCTET =>
   qr/([0-9]|[0-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])/x;
 
 ##****************************************************************************
+## Functions
+##****************************************************************************
+
+=head1 FUNCTIONS
+
+=cut
+
+##****************************************************************************
 ##****************************************************************************
 
 =head2 str_trim($string)
@@ -58,7 +66,13 @@ Trim leading and trailing whitespace from the given string
 
 =item B<Parameters>
 
-$string - String to trim
+=over 4
+
+=item I<$string>
+
+String to trim
+
+=back
 
 =item B<Return>
 
@@ -92,8 +106,13 @@ empty strings
 
 =item B<Parameters>
 
-$lookup - HASH reference whose values will be used as keys for the
-          returned hash reference
+=over 4
+
+=item I<$lookup>
+
+HASH reference whose values will be used as keys for the returned hash reference
+
+=back
 
 =item B<Return>
 
@@ -131,8 +150,17 @@ text.
 
 =item B<Parameters>
 
-$text - String to match
-$lookup - Hash reference whose keys will be used to match the provided text
+=over 4
+
+=item I<$text>
+
+String to match
+
+=item I<$lookup>
+
+Hash reference whose keys will be used to match the provided text
+
+=back
 
 =item B<Return>
 
@@ -173,7 +201,13 @@ notation  (i.e. 10.0.0.10)
 
 =item B<Parameters>
 
-$string - Value to parse
+=over 4
+
+=item I<$string>
+
+Value to parse
+
+=back
 
 =item B<Return>
 
