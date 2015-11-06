@@ -85,6 +85,14 @@ Readonly::Scalar my $WLAN_PROFILE_KEY_LOOKUP => {
 };
 
 ##****************************************************************************
+## Object Methods
+##****************************************************************************
+
+=head1 FUNCTIONS
+
+=cut
+
+##****************************************************************************
 ##****************************************************************************
 
 =head2 wlan_debug($level)
@@ -136,28 +144,78 @@ NONE
 =item B<Return>
 
 ARRAY reference of hash references whose keys are as follows:
-  name        - Name of the interface
-  description - Description of the interface
-  guid        - GUID associated with the interface
-  mac_address - IEEE MAC address of the interfaces as a string
-                with the format "xx:xx:xx:xx:xx:xx" where xx is a
-                hexadecimal number between 00 and ff
-  state       - disconnected, discovering, or connected
-  ssid        - SSID of connected wireless network
-  bssid       - IEEE MAC address of the associated accees point as 
-                a string with the format "xx:xx:xx:xx:xx:xx" where xx
-                is a hexadecimal number between 00 and ff
-  net_type    - String indicating "Infrastructure" or "Ad hoc" mode
-                for the connection
-  radio       - String indicating if connection is 802.11b 802.11n etc.
-  auth        - String indicating the type of authentication for the
-                connection
-  cipher      - String indicating the cypher type
-  mode        - String indicating connection mode
-  channel     - RF channel used for connection
-  rx_rate     - Receive rate in Mbps
-  tx_rate     - Receive rate in Mbps
-  signal      - Signal strength as a percentage
+
+=over 4
+
+=item I<name>
+
+Name of the interface
+
+=item I<description>
+
+Description of the interface
+
+=item I<guid>
+
+GUID associated with the interface
+
+=item I<mac_address>
+
+IEEE MAC address of the interfaces as a string
+with the format "xx:xx:xx:xx:xx:xx" where xx is a
+hexadecimal number between 00 and ff
+
+=item I<state>
+
+Disconnected, discovering, or connected
+
+=item I<ssid >
+
+SSID of connected wireless network
+
+=item I<bssid>
+
+IEEE MAC address of the associated accees point as 
+a string with the format "xx:xx:xx:xx:xx:xx" where xx
+is a hexadecimal number between 00 and ff
+
+=item I<net_type>
+
+String indicating "Infrastructure" or "Ad hoc" mode for the connection
+
+=item I<radio>
+
+String indicating if connection is 802.11b 802.11n etc.
+
+=item I<auth>
+
+String indicating the type of authentication for the connection
+
+=item I<cipher>
+
+String indicating the cypher type
+
+=item I<mode>
+
+String indicating connection mode
+
+=item I<channel>
+
+RF channel used for connection
+
+=item I<rx_rate>
+
+Receive rate in Mbps
+
+=item I<tx_rate>
+
+Receive rate in Mbps
+
+=item I<signal>
+
+Signal strength as a percentage
+
+=back
 
 =back
 
@@ -227,21 +285,51 @@ Return a hash reference with details of the given profile name
 
 =item B<Parameters>
 
-$name - Name of the profile
+=over 4
+
+=item I<$name>
+
+Name of the profile
+
+=back
 
 =item B<Return>
 
 UNDEF if profile not found, or a hash reference with the following keys:
-  name        - Name of the profile
-  interface   - Name of the interface
-  ssid        - SSID of the wireless network
-  net_type    - String indicating "Infrastructure" or "Ad hoc" mode
-                for the connection
-  radio       - String indicating if connection is 802.11b 802.11n etc.
-  auth        - String indicating the type of authentication for the
-                connection
-  cipher      - String indicating the cypher type
-  mode        - String indicating connection mode
+
+=over 4
+
+=item I<name>
+
+Name of the profile
+
+=item I<interface>
+
+Name of the interface
+
+=item I<ssid>
+
+SSID of the wireless network
+
+=item I<net_type>
+
+String indicating "Infrastructure" or "Ad hoc" mode for the connection
+
+=item I<radio>
+
+String indicating if connection is 802.11b 802.11n etc.
+
+=item I<auth>
+
+String indicating the type of authentication for the connection
+
+=item I<cipher>
+String indicating the cypher type
+
+=item I<mode>
+String indicating connection mode
+
+=back
 
 =back
 
@@ -284,16 +372,40 @@ NONE
 
 ARRAY reference of hash references corresponding to each profile. Each hash
 reference has the following keys:
-  name        - Name of the profile
-  interface   - Name of the interface
-  ssid        - SSID of the wireless network
-  net_type    - String indicating "Infrastructure" or "Ad hoc" mode
-                for the connection
-  radio       - String indicating if connection is 802.11b 802.11n etc.
-  auth        - String indicating the type of authentication for the
-                connection
-  cipher      - String indicating the cypher type
-  mode        - String indicating connection mode
+
+=over 4
+
+=item I<name>
+
+Name of the profile
+
+=item I<interface>
+
+Name of the interface
+
+=item I<ssid>
+
+SSID of the wireless network
+
+=item I<net_type>
+
+String indicating "Infrastructure" or "Ad hoc" mode for the connection
+
+=item I<radio>
+
+String indicating if connection is 802.11b 802.11n etc.
+
+=item I<auth>
+
+String indicating the type of authentication for the connection
+
+=item I<cipher>
+String indicating the cypher type
+
+=item I<mode>
+String indicating connection mode
+
+=back
 
 =back
 
@@ -410,10 +522,29 @@ then the profile will be added for all interfaces and all users
 
 =item B<Parameters>
 
-$filename - Filename of the XML file containing the wireless profiles
-$options  - Optional hash reference with the following keys:
-  interface - Name of the interface for the profile
-  user      - User scope (all or current)
+=over 4
+
+=item I<$filename>
+
+Filename of the XML file containing the wireless profiles
+
+=item I<$options>
+
+Optional hash reference with the following keys:
+
+=over 6
+
+=item interface
+
+Name of the interface for the profile
+
+=item user
+
+User scope (all or current)
+
+=back
+
+=back 
 
 =item B<Return>
 
@@ -462,7 +593,13 @@ Delete the specified profile if it exists
 
 =item B<Parameters>
 
-$name - name of the profile to delete
+=over 4
+
+=item I<$name>
+
+Name of the profile to delete
+
+=back
 
 =item B<Return>
 
