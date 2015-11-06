@@ -327,9 +327,20 @@ sub wlan_profile_list
 
 ##----------------------------------------------------------------------------
 ##     @fn _parse_profile_info($lines)
-##  @brief
-##  @param
-## @return
+##  @brief Parse the reponse lines and return a wireless profile info hash
+##         reference
+##  @param $lines - Array reference to linse of response data
+## @return HASH reference with the following keys:
+##         name      - Name of the profile
+##         interface - Name of the interface
+##         ssid      - SSID of the wireless network
+##         net_type  - String indicating "Infrastructure" or "Ad hoc" mode
+##                     for the connection
+##         radio     - String indicating if connection is 802.11b 802.11n etc.
+##         auth      - String indicating the type of authentication for the
+##                     connection
+##         cipher    - String indicating the cypher type
+##         mode      - String indicating connection mode
 ##   @note
 ##----------------------------------------------------------------------------
 sub _parse_profile_info
@@ -504,7 +515,7 @@ NONE
 
 =item B<Return>
 
-NONE
+SCALAR - Error string
 
 =back
 
