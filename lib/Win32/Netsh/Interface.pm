@@ -735,13 +735,12 @@ sub interface_enable
     print(qq{RESPONSE: [$response]\n});
   }
   
-  if ($response =~ /system .+ cannot \s+ find/x)
-  {
-    ## Set the error and exist
-    $interface_error = qq{Interface not found.};
-    return;
-  }
+  ## Trim the response
+  $interface_error = str_trim($response);
 
+  ## Return undef if we have an error
+  return if ($interface_error);
+  
   ## Return success
   return(1);
 }
