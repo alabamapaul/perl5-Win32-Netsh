@@ -55,5 +55,25 @@ foreach my $profile (qw(Wireless_ESS Bogus))
     (wlan_profile_info($profile) ? qq{exists} : qq{does not exist}),
     qq{\n});
 }
-  
+
+interface_info_all();
+
+interface_info(qq{Local Area Connection});
+
+interface_info(qq{Local Area Connection 12});
+
+interface_debug(0);
+foreach my $interface ((qq{Local Area Connection 12}, qq{Local Area Connection 2}))
+{
+  print(qq{Enabling "$interface"...});
+  if (interface_enable($interface, 1))
+  {
+    print(qq{ DONE!\n});
+  }
+  else
+  {
+    print(qq{ERROR: }, interface_last_error(), qq{\n});
+  }
+}
+
 __END__
