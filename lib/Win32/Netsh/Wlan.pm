@@ -40,7 +40,7 @@ use Exporter::Easy (
   TAGS => [
     debug   => [qw(wlan_debug),],
     profile => [
-      qw(wlan_last_error wlan_profile_list wlan_profile_info wlan_profile_add wlan_profile_delete)
+      qw(wlan_profile_list wlan_profile_info wlan_profile_add wlan_profile_delete)
     ],
     interface => [qw(wlan_list_interfaces)],
     all       => [qw(wlan_last_error :debug :profile :interface),],
