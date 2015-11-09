@@ -30,26 +30,36 @@ use strict;
 use warnings;
 use 5.010;
 use Readonly;
+use Win32;
 use Win32::Netsh;
 use Win32::Netsh::Utils qw(:all);
 use Data::Dumper;
 use Exporter::Easy (
   EXPORT => [],
-  OK     => [qw(interface_ipv4_info interface_ipv4_info_all interface_debug)],
-  TAGS   => [
-    debug => [qw(interface_debug),],
-    all   => [qw(:debug interface_ipv4_info interface_ipv4_info_all),],
+  OK     => [
+    qw(interface_last_error interface_ipv4_info interface_ipv4_info_all interface_debug interface_info_all interface_info interface_enable)
+  ],
+  TAGS => [
+    debug     => [qw(interface_debug),],
+    interface => [qw(interface_info_all interface_info interface_enable)],
+    ipv4      => [qw(interface_ipv4_info interface_ipv4_info_all)],
+    all       => [qw(interface_last_error :debug :interface :ipv4),],
   ],
 );
 
 ## Version string
 our $VERSION = qq{0.01};
 
+##-------------------------------------------------
+## Module variables
+##-------------------------------------------------
 my $debug           = 0;
 my $interface_error = qq{};
 
 ##-------------------------------------------------
+## Lookup tables
 ##-------------------------------------------------
+## Lookup table for interface ipv4 context
 Readonly::Scalar my $IPV4_KEY_LOOKUP => {
   qq{DHCP enabled}    => qq{dhcp},
   qq{IP Address}      => qq{ip},
@@ -57,6 +67,13 @@ Readonly::Scalar my $IPV4_KEY_LOOKUP => {
   qq{Default Gateway} => qq{gateway},
   qq{Gateway Metric}  => qq{gw_metric},
   qq{InterfaceMetric} => qq{if_metric},
+};
+
+## Lookup table for interface context
+Readonly::Scalar my $INTERFACE_KEY_LOOKUP => {
+  qq{Type}                 => qq{type},
+  qq{Administrative state} => qq{enabled},
+  qq{Connect state}        => qq{state},
 };
 
 ##****************************************************************************
@@ -80,11 +97,23 @@ Set the debug level for the module
 
 =item B<Parameters>
 
-$level - Debug level
+=over 4
+
+=item I<$level>
+
+Debug level
+
+=back
 
 =item B<Return>
 
-SCALAR - Current debug level
+=over 4
+
+=item I<SCALAR>
+
+Current debug level
+
+=back
 
 =back
 
@@ -224,9 +253,13 @@ Name of the interface
 
 =item B<Return>
 
+=over 4
+
+=item I<HASH reference>
+
 HASH reference whose keys are as follows:
 
-=over 4
+=over 6
 
 =item I<name>
 
@@ -260,6 +293,8 @@ Interface metric
 
 =back
 
+=back
+
 =cut
 
 ##----------------------------------------------------------------------------
@@ -268,7 +303,7 @@ sub interface_ipv4_info
   my $name = shift // qq{};
 
   print(qq{interface_ipv4_info()\n}) if ($debug);
-  
+
   my $command  = qq{interface ipv4 show addresses name="$name"};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -300,9 +335,13 @@ NONE
 
 =item B<Return>
 
-ARRAY reference of hash references whose keys are as follows:
-
 =over 4
+
+=item I<ARRAY reference>
+
+Array reference to array of hash references whose keys are as follows:
+
+=over 6
 
 =item I<name>
 
@@ -336,6 +375,8 @@ Interface metric
 
 =back
 
+=back
+
 =cut
 
 ##----------------------------------------------------------------------------
@@ -345,7 +386,7 @@ sub interface_ipv4_info_all
   my $all   = [];
 
   print(qq{interface_ipv4_info_all()\n}) if ($debug);
-  
+
   my $command  = qq{interface ipv4 show addresses};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -381,11 +422,21 @@ Return the error string associated with the last command
 
 =item B<Parameters>
 
-NONE
+=over 4
+
+=item I<NONE>
+
+=back
 
 =item B<Return>
 
-SCALAR - Error string
+=over 4
+
+=item I<SCALAR>
+
+Error string
+
+=back
 
 =back
 
@@ -410,13 +461,21 @@ Return an reference to an array of hash references with interface information
 
 =item B<Parameters>
 
-NONE
+=over 4
+
+=item I<NONE>
+
+=back
 
 =item B<Return>
 
+=over 4
+
+=item I<ARRAY REFERENCE>
+
 ARRAY reference of hash references whose keys are as follows:
 
-=over 4
+=over 6
 
 =item I<name>
 
@@ -438,16 +497,17 @@ Indicates the type of interface
 
 =back
 
+=back
+
 =cut
 
 ##----------------------------------------------------------------------------
 sub interface_info_all
 {
   my $all = [];
-  my $info;
 
   print(qq{interface_info_all()\n}) if ($debug);
-  
+
   my $command  = qq{interface show interface};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -458,7 +518,8 @@ sub interface_info_all
 
   foreach my $line (split(qq{\n}, $response))
   {
-    if ($line =~ /\A(Enabled|Disabled)\s+(.*)\s+(.*)\s+(.*)\Z/x)
+    ## Parse each line
+    if ($line =~ /\A(Enabled|Disabled)\s+(\S+?)\s+(\S+)\s+(.*)\Z/x)
     {
       my $info = {
         enabled => ((uc($1) eq qq{ENABLED}) ? 1 : 0),
@@ -466,7 +527,7 @@ sub interface_info_all
         type    => $3,
         name    => str_trim($4),
       };
-      
+
       push(@{$all}, $info);
     }
   }
@@ -478,6 +539,212 @@ sub interface_info_all
   return ($all);
 }
 
+##****************************************************************************
+##****************************************************************************
+
+=head2 interface_info($name)
+
+=over 2
+
+=item B<Description>
+
+Return a hash references with interface information
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$name>
+
+Name of the interface such as "Local Area Connection"
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<UNDEF>
+
+Indicates the named interface could not be found
+
+=item I<HASH reference>
+
+Hash reference whose keys are as follows:
+
+=over 6
+
+=item I<name>
+
+Name of the interface
+
+=item I<enabled>
+
+Boolean indicating if the administrative state is enabled
+
+=item I<state>
+
+Indicates the connections state as Connected or Disconnected
+
+=item I<type>
+
+Indicates the type of interface
+
+=back
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub interface_info
+{
+  my $name = shift // qq{};
+  my $info;
+
+  print(qq{interface_info("$name")\n}) if ($debug);
+
+  my $command  = qq{interface show interface name="$name"};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  foreach my $line (split(qq{\n}, $response))
+  {
+    if ($line =~ /\A\s+ ([^:]+): \s+ (.*)\Z/x)
+    {
+      my $text  = str_trim($1);
+      my $value = str_trim($2);
+      print(qq{  TEXT:  [$text]\n  VALUE: [$value]\n}) if ($debug);
+
+      if (my $key = get_key_from_lookup($text, $INTERFACE_KEY_LOOKUP))
+      {
+        ## See if the variable is defined
+        unless ($info)
+        {
+          ## Initialize the variable
+          $info = initialize_hash_from_lookup($INTERFACE_KEY_LOOKUP);
+          $info->{name} = $name;
+        }
+
+        ## Translate the enabled field into a boolean
+        $value = ((uc($value) eq qq{ENABLED}) ? 1 : 0) if ($key eq qq{enabled});
+
+        ## Save the field data
+        $info->{$key} = $value;
+
+      }
+    }
+  }
+
+  if ($debug >= 2)
+  {
+    print(Data::Dumper->Dump([$info,], [qw(info),]), qq{\n});
+  }
+  return ($info);
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 interface_enable($name, $enable)
+
+=over 2
+
+=item B<Description>
+
+Enable / disable the specified interface
+
+B<NOTE:> The script must be running with Administrator privileges for to be able to
+enable or disable an interface
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$name>
+
+Name of the interface to control
+
+=item I<$enaable>
+
+Boolean value indicating if the interface should be enabled
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<SCALAR>
+
+=over 6
+
+=item SCALAR
+
+A "true" value indicates success
+
+=item UNDEF
+
+UNDEF or a "false" vale indicates an error. The error message can be retrieved
+using interface_last_error()
+
+=back
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub interface_enable
+{
+  my $name = shift // qq{};
+  my $enabled = shift // 1;
+
+  $interface_error = qq{};
+
+  print(qq{interface_enable("$name", $enabled)\n}) if ($debug);
+
+  ## See if script is running as admin
+  if (Win32::IsAdminUser())
+  {
+    ## Running as admin, clear any error
+    $interface_error = qq{};
+  }
+  else
+  {
+    ## Not running as admin, set error and return
+    $interface_error = qq{Must have Administrator privileges to enable or disable an interface!};
+    return;
+  }
+
+  ## Set to the format the netsh command needs
+  $enabled = ($enabled ? qq{ENABLED} : qq{DISABLED});
+  my $command  = qq{interface set interface name="$name" admin=$enabled};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+  
+  if ($response =~ /system .+ cannot \s+ find/x)
+  {
+    ## Set the error and exist
+    $interface_error = qq{Interface not found.};
+    return;
+  }
+
+  ## Return success
+  return(1);
+}
 
 ##****************************************************************************
 ## Additional POD documentation
