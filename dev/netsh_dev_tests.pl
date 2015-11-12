@@ -230,6 +230,23 @@ if ($gOptions{'list-wlan'})
 }
 
 ##---------------------------------------------
+## Individual interfaces
+##---------------------------------------------
+if (scalar(@{$gOptions{wlan}}))
+{
+  foreach my $interface (@{$gOptions{wlan}})
+  {
+    my $interface_info = wlan_interface_info($interface);
+    unless ($gOptions{debug})
+    {
+      print(qq{Interface "$interface"\n});
+      print(Data::Dumper->Dump([$interface_info,], [qw(interface_info),]),
+        qq{\n});
+    }
+  }
+}
+
+##---------------------------------------------
 ## Wireless profiles
 ##---------------------------------------------
 if ($gOptions{'list-profile'})
