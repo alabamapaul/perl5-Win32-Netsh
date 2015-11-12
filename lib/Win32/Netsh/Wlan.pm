@@ -18,9 +18,9 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Win32::Netsh::Wlan qw(wlan_list_interfaces);
+  use Win32::Netsh::Wlan qw(wlan_interface_info_all);
   
-  my @wireless_if = wlan_list_interfaces();
+  my @wireless_if = wlan_interface_info_all();
 
 =cut
 
@@ -36,13 +36,13 @@ use Data::Dumper;
 use Exporter::Easy (
   EXPORT => [],
   OK =>
-    [qw(wlan_list_interfaces wlan_profile_list wlan_profile_info wlan_debug)],
+    [qw(wlan_interface_info_all wlan_interface_info wlan_profile_info_all wlan_profile_info wlan_debug)],
   TAGS => [
     debug   => [qw(wlan_debug),],
     profile => [
-      qw(wlan_profile_list wlan_profile_info wlan_profile_add wlan_profile_delete)
+      qw(wlan_profile_info_all wlan_profile_info wlan_profile_add wlan_profile_delete)
     ],
-    interface => [qw(wlan_list_interfaces)],
+    interface => [qw(wlan_interface_info_all wlan_interface_info)],
     all       => [qw(wlan_last_error :debug :profile :interface),],
   ],
 );
@@ -128,7 +128,7 @@ sub wlan_debug
 ##****************************************************************************
 ##****************************************************************************
 
-=head2 wlan_list_interfaces()
+=head2 wlan_interface_info_all()
 
 =over 2
 
@@ -222,7 +222,7 @@ Signal strength as a percentage
 =cut
 
 ##----------------------------------------------------------------------------
-sub wlan_list_interfaces
+sub wlan_interface_info_all
 {
   my $interfaces = [];
   my $interface;
@@ -275,6 +275,148 @@ sub wlan_list_interfaces
 ##****************************************************************************
 ##****************************************************************************
 
+=head2 wlan_interface_info($name)
+
+=over 2
+
+=item B<Description>
+
+Return a reference to a hash that describes the wireless interface
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$name>
+
+Name of the interface such as "Wireless Network Connection"
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<UNDEF>
+
+Indicates the named interface could not be found
+
+=item I<HASH reference>
+
+Hash reference whose keys are as follows:
+
+=over 6
+
+=item I<name>
+
+Name of the interface
+
+=item I<description>
+
+Description of the interface
+
+=item I<guid>
+
+GUID associated with the interface
+
+=item I<mac_address>
+
+IEEE MAC address of the interfaces as a string
+with the format "xx:xx:xx:xx:xx:xx" where xx is a
+hexadecimal number between 00 and ff
+
+=item I<state>
+
+Disconnected, discovering, or connected
+
+=item I<ssid >
+
+SSID of connected wireless network
+
+=item I<bssid>
+
+IEEE MAC address of the associated accees point as 
+a string with the format "xx:xx:xx:xx:xx:xx" where xx
+is a hexadecimal number between 00 and ff
+
+=item I<net_type>
+
+String indicating "Infrastructure" or "Ad hoc" mode for the connection
+
+=item I<radio>
+
+String indicating if connection is 802.11b 802.11n etc.
+
+=item I<auth>
+
+String indicating the type of authentication for the connection
+
+=item I<cipher>
+
+String indicating the cypher type
+
+=item I<mode>
+
+String indicating connection mode
+
+=item I<channel>
+
+RF channel used for connection
+
+=item I<rx_rate>
+
+Receive rate in Mbps
+
+=item I<tx_rate>
+
+Receive rate in Mbps
+
+=item I<signal>
+
+Signal strength as a percentage
+
+=back
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_interface_info
+{
+  my $name = shift;
+  
+  return unless($name);
+
+  print(qq{wlan_interface_info("$name")\n}) if ($debug);
+
+  ## Reset the module error message
+  $wlan_error = qq{};
+  
+  foreach my $interface (wlan_interface_info_all())
+  {
+    if (uc($name) eq uc($interface->{name}))
+    {
+      if ($debug >= 2)
+      {
+        print(Data::Dumper->Dump([$interface,], [qw(interface),]), qq{\n});
+      }
+      return($interface);
+    }
+  }
+  
+  ## Set the module error message
+  $wlan_error = qq{Could locate wireless interface "$name"};
+  print($wlan_error, qq{\n}) if ($debug >= 2);
+  return;
+
+}
+
+##****************************************************************************
+##****************************************************************************
+
 =head2 wlan_profile_info($name)
 
 =over 2
@@ -295,9 +437,17 @@ Name of the profile
 
 =item B<Return>
 
-UNDEF if profile not found, or a hash reference with the following keys:
-
 =over 4
+
+=item I<UNDEF>
+
+Indicates profile not found
+
+=item I<HASH Reference>
+
+Hash reference whose keys are as follows:
+
+=over 6
 
 =item I<name>
 
@@ -333,6 +483,8 @@ String indicating connection mode
 
 =back
 
+=back
+
 =cut
 
 ##----------------------------------------------------------------------------
@@ -356,7 +508,7 @@ sub wlan_profile_info
 ##****************************************************************************
 ##****************************************************************************
 
-=head2 wlan_profile_list()
+=head2 wlan_profile_info_all()
 
 =over 2
 
@@ -412,7 +564,7 @@ String indicating connection mode
 =cut
 
 ##----------------------------------------------------------------------------
-sub wlan_profile_list
+sub wlan_profile_info_all
 {
   my $list     = [];
   my $command  = qq{wlan show profile name="*"};
@@ -559,6 +711,7 @@ sub wlan_profile_add
 {
   my $filename = shift;
   my $options = shift // {};
+  
   ## Reset the module error message
   $wlan_error = qq{};
 
@@ -576,6 +729,7 @@ sub wlan_profile_add
 
   ## Set the module error message
   $wlan_error = str_trim($response);
+  print($wlan_error, qq{\n}) if ($debug >= 2);
 
   return;
 }
@@ -631,6 +785,7 @@ sub wlan_profile_delete
 
   ## Set the module error message
   $wlan_error = str_trim($response);
+  print($wlan_error, qq{\n}) if ($debug >= 2);
 
   return;
 }
