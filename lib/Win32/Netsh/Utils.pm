@@ -18,7 +18,7 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-  use Win32::Netsh::utils;
+  use Win32::Netsh::Utils;
   
 =cut
 
