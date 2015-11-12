@@ -395,7 +395,7 @@ sub wlan_interface_info
   ## Reset the module error message
   $wlan_error = qq{};
   
-  foreach my $interface (wlan_interface_info_all())
+  foreach my $interface (@{wlan_interface_info_all()})
   {
     if (uc($name) eq uc($interface->{name}))
     {
