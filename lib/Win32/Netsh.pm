@@ -6,6 +6,7 @@ package Win32::Netsh;
 ##  * Before comitting this file to the repository, ensure Perl Critic can be
 ##    invoked at the HARSH [3] level with no errors
 ##****************************************************************************
+
 =head1 NAME
 
 Win32::Netsh - A family of modules for querying and manipulating the network
@@ -28,9 +29,8 @@ Version 0.01
 use strict;
 use warnings;
 use 5.010;
-use Exporter::Easy (
-  EXPORT => [qw(netsh)],
-  );
+use Carp;
+use Exporter::Easy (EXPORT => [qw(netsh)],);
 
 ## Version string
 our $VERSION = qq{0.01};
@@ -59,21 +59,29 @@ SCALAR - String captured from the standard out of the command
 =cut
 
 ##----------------------------------------------------------------------------
-sub netsh ## no critic (RequireArgUnpacking)
+sub netsh    ## no critic (RequireArgUnpacking)
 {
-  my $command = qq{netsh};
+
+  ## Make sure this is a Windows box
+  unless ($^O eq qq{MSWin32})
+  {
+    croak(
+      qq{Win32::Netsh is intended for use on Microsoft Windows platforms only!}
+    );
+  }
 
   ## Build the command
+  my $command = qq{netsh};
   foreach my $arg (@_)
   {
     $command .= qq{ } . $arg;
   }
-  
+
   ## Execute command and capture output
-  my $result = qx{$command};  ## no critic (ProhibitBacktick)
-  
+  my $result = qx{$command};    ## no critic (ProhibitBacktick)
+
   ## return the result
-  return($result);
+  return ($result);
 }
 
 ##****************************************************************************
