@@ -45,6 +45,7 @@ my @CommandLineOptions = (
   "man",
   "debug+",
   "interface=s@",
+  "enable-interface=s@",
   "list-ipv4!",
   "list-interface!",
   "list-wlan!",
@@ -63,19 +64,20 @@ my @CommandLineOptions = (
 ## options
 ##--------------------------------------------------------
 my %gOptions = (
-  help             => 0,
-  man              => 0,
-  debug            => 0,
-  interface        => [],
-  ipv4             => [],
-  wlan             => [],
-  profile          => [],
-  'add-profile'    => [],
-  'delete-profile' => [],
-  'list-ipv4' => 1,
-  'list-interface' => 1,
-  'list-wlan' => 1,
-  'list-profile' => 1,
+  help               => 0,
+  man                => 0,
+  debug              => 0,
+  'enable-interface' => [],
+  interface          => [],
+  ipv4               => [],
+  wlan               => [],
+  profile            => [],
+  'add-profile'      => [],
+  'delete-profile'   => [],
+  'list-ipv4'        => 0,
+  'list-interface'   => 0,
+  'list-wlan'        => 0,
+  'list-profile'     => 0,
 );
 
 ##----------------------------------------------------------------------------
@@ -218,7 +220,7 @@ $Data::Dumper::Sortkeys = \&sort_keys;
 ##---------------------------------------------
 if ($gOptions{'list-wlan'})
 {
-  my $wlan_interfaces = wlan_list_interfaces();
+  my $wlan_interfaces = wlan_interface_info_all();
   unless ($gOptions{debug})
   {
     print(qq{Wireless interfaces...\n});
@@ -232,7 +234,7 @@ if ($gOptions{'list-wlan'})
 ##---------------------------------------------
 if ($gOptions{'list-profile'})
 {
-  my $wlan_profiles = wlan_profile_list();
+  my $wlan_profiles = wlan_profile_info_all();
   unless ($gOptions{debug})
   {
     print(qq{Wireless profiles...\n});
@@ -341,17 +343,19 @@ if (scalar(@{$gOptions{interface}}))
 ##---------------------------------------------
 ## Interface control
 ##---------------------------------------------
-print(qq{Interface enable / disable ...\n});
-foreach my $interface ((qq{Local Area Connection}, qq{Invalid Connection}))
+if (scalar(@{$gOptions{'enable-interface'}}))
 {
-  print(qq{Enabling "$interface"...});
-  if (interface_enable($interface, 1))
+  foreach my $interface (@{$gOptions{'enable-interface'}})
   {
-    print(qq{ DONE!\n});
-  }
-  else
-  {
-    print(qq{ERROR: }, interface_last_error(), qq{\n});
+    print(qq{Enabling "$interface"...});
+    if (interface_enable($interface, 1))
+    {
+      print(qq{ DONE!\n});
+    }
+    else
+    {
+      print(qq{ERROR: }, interface_last_error(), qq{\n});
+    }
   }
 }
 
@@ -373,15 +377,24 @@ family of modules
 =head1 SYNOPSIS
 
 B<netsh_dev_tests.pl> {B<--help>}
+{B<--list-interface>} 
 {B<--interface> I<InterfaceName>}
+{B<--enable-interface> I<InterfaceName>}
+{B<--list-ipv4>} 
 {B<--ipv4> I<InterfaceName>}
+{B<--list-wlan>}
+{B<--wlan> I<InterfaceName>}
+{B<--list-profile>}
 {B<--add-profile> I<WirelessProfileFilename>}
 {B<--delete-profile> I<WirelessProfileName>}
-
   
 =head1 OPTIONS
 
 =over 4
+
+=item B<--list-interface>
+
+List all the network interfaces
 
 =item B<--interface> I<InterfaceName>
 
@@ -389,11 +402,35 @@ List interface details about the specified interface.
 
 Multiple --interface parameters can be provided
 
+=item B<--enable-interface> I<InterfaceName>
+
+Enable the specified specified interface. 
+
+Multiple --enable-interface parameters can be provided
+
+=item B<--list-ipv4>
+
+List details about all the IPv4 connections
+
 =item B<--ipv4> I<InterfaceName>
 
 List IPv4 details about the specified interface. 
 
 Multiple --ipv4 parameters can be provided
+
+=item B<--list-wlan>
+
+List details about all wireless interfaces
+
+=item B<--wlan> I<InterfaceName>
+
+List details about the specified wireless interface
+
+Multiple --wlan parameters can be provided
+
+=item B<--list-profile>
+
+List details about all wireless profiles
 
 =item B<--add-profile> I<WirelessProfileFilename>
 
