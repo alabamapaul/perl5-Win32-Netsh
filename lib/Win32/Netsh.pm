@@ -88,6 +88,14 @@ sub netsh    ## no critic (RequireArgUnpacking)
 ## Additional POD documentation
 ##****************************************************************************
 
+=head1 SEE ALSO
+
+L<Win32::Netsh::Interface> for examining and controlling the netsh interface
+context including interface ipv4.
+
+L<Win32::Netsh::Wlan> for examining and controlling the netsh wlan context
+for wireless interfaces.
+
 =head1 AUTHOR
 
 Paul Durden E<lt>alabamapaul AT gmail.comE<gt>

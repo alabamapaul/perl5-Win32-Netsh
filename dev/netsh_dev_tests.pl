@@ -463,18 +463,18 @@ Multiple --delete-profile parameters can be provided
 
 =item B<--help>
 
-  Display basic help.
+Display basic help.
 
 =item B<--man>
 
-  Display more detailed help.
+Display more detailed help.
 
 =back
 
 =head1 DESCRIPTION
 
-netsh_dev_tests.pl script to exercise various functions in the Win32::Netsh
-family of modules.
+The netsh_dev_tests.pl script is used to exercise various functions in the 
+Win32::Netsh family of modules.
 
 =cut
 

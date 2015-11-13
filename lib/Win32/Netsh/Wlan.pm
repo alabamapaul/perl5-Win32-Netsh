@@ -823,6 +823,11 @@ sub wlan_last_error
 ## Additional POD documentation
 ##****************************************************************************
 
+=head1 SEE ALSO
+
+L<Win32::Netsh::Interface> for examining and controlling the netsh interface
+context including interface ipv4.
+
 =head1 AUTHOR
 
 Paul Durden E<lt>alabamapaul AT gmail.comE<gt>
