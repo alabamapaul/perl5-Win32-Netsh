@@ -35,15 +35,29 @@ use Win32::Netsh::Utils qw(:all);
 use Data::Dumper;
 use Exporter::Easy (
   EXPORT => [],
-  OK =>
-    [qw(wlan_interface_info_all wlan_interface_info wlan_profile_info_all wlan_profile_info wlan_debug)],
+  OK     => [
+    qw(
+      wlan_connect
+      wlan_interface_info_all
+      wlan_interface_info
+      wlan_profile_info_all
+      wlan_profile_info
+      wlan_debug
+      )
+  ],
   TAGS => [
+    connect => [qw(wlan_connect),],
     debug   => [qw(wlan_debug),],
     profile => [
-      qw(wlan_profile_info_all wlan_profile_info wlan_profile_add wlan_profile_delete)
+      qw(
+        wlan_profile_info_all
+        wlan_profile_info
+        wlan_profile_add
+        wlan_profile_delete
+        )
     ],
     interface => [qw(wlan_interface_info_all wlan_interface_info)],
-    all       => [qw(wlan_last_error :debug :profile :interface),],
+    all       => [qw(wlan_last_error :debug :connect :profile :interface),],
   ],
 );
 
@@ -227,6 +241,8 @@ sub wlan_interface_info_all
   my $interfaces = [];
   my $interface;
 
+  print(qq{wlan_interface_info_all()\n}) if ($debug);
+
   my $command  = qq{wlan show interface};
   my $response = netsh($command);
   if ($debug >= 2)
@@ -387,14 +403,21 @@ Signal strength as a percentage
 sub wlan_interface_info
 {
   my $name = shift;
-  
-  return unless($name);
 
   print(qq{wlan_interface_info("$name")\n}) if ($debug);
 
+  ## Make sure a name was provided
+  unless ($name)
+  {
+    ## Set the module error message
+    $wlan_error = qq{No name provided!};
+    print($wlan_error, qq{\n}) if ($debug >= 2);
+    return;
+  }
+
   ## Reset the module error message
   $wlan_error = qq{};
-  
+
   foreach my $interface (@{wlan_interface_info_all()})
   {
     if (uc($name) eq uc($interface->{name}))
@@ -403,10 +426,10 @@ sub wlan_interface_info
       {
         print(Data::Dumper->Dump([$interface,], [qw(interface),]), qq{\n});
       }
-      return($interface);
+      return ($interface);
     }
   }
-  
+
   ## Set the module error message
   $wlan_error = qq{Could locate wireless interface "$name"};
   print($wlan_error, qq{\n}) if ($debug >= 2);
@@ -491,6 +514,17 @@ String indicating connection mode
 sub wlan_profile_info
 {
   my $name = shift // qq{};
+
+  print(qq{wlan_profile_info("$name")\n}) if ($debug);
+
+  ## Make sure a name was provided
+  unless ($name)
+  {
+    ## Set the module error message
+    $wlan_error = qq{No name provided!};
+    print($wlan_error, qq{\n}) if ($debug >= 2);
+    return;
+  }
 
   my $command  = qq{wlan show profile name="$name"};
   my $response = netsh($command);
@@ -709,9 +743,20 @@ UNDEF on error, or 1 for success
 ##----------------------------------------------------------------------------
 sub wlan_profile_add
 {
-  my $filename = shift;
-  my $options = shift // {};
-  
+  my $filename = shift // qq{};
+  my $options  = shift // {};
+
+  print(qq{wlan_profile_add("$filename")\n}) if ($debug);
+
+  ## Make sure a name was provided
+  unless ($filename)
+  {
+    ## Set the module error message
+    $wlan_error = qq{No filename provided!};
+    print($wlan_error, qq{\n}) if ($debug >= 2);
+    return;
+  }
+
   ## Reset the module error message
   $wlan_error = qq{};
 
@@ -768,10 +813,19 @@ sub wlan_profile_delete
 {
   my $name = shift;
 
+  print(qq{wlan_profile_delete("$name")\n}) if ($debug);
+
+  ## Make sure a name was provided
+  unless ($name)
+  {
+    ## Set the module error message
+    $wlan_error = qq{No name provided!};
+    print($wlan_error, qq{\n}) if ($debug >= 2);
+    return;
+  }
+
   ## Reset the module error message
   $wlan_error = qq{};
-
-  return unless (defined($name));
 
   my $command  = qq{wlan delete profile name="$name"};
   my $response = netsh($command);
@@ -799,15 +853,17 @@ sub wlan_profile_delete
 
 =item B<Description>
 
-Return the error string associated with the last command
+Return the error string associated with the last wlan command
 
 =item B<Parameters>
 
 NONE
 
+=back
+
 =item B<Return>
 
-SCALAR - Error string
+SCALAR - error string
 
 =back
 
@@ -817,6 +873,71 @@ SCALAR - Error string
 sub wlan_last_error
 {
   return ($wlan_error);
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 wlan_connect($name)
+
+=over 2
+
+=item B<Description>
+
+Connect to the wireless network specified in the named profile
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$name>
+
+Name of the profile to use to connect.
+
+=back
+
+=item B<Return>
+
+UNDEF on error, or 1 for success
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_connect
+{
+  my $name = shift // qq{};
+
+  print(qq{wlan_connect("$name")\n}) if ($debug);
+
+  ## Make sure a name was provided
+  unless ($name)
+  {
+    ## Set the module error message
+    $wlan_error = qq{No name provided!};
+    print($wlan_error, qq{\n}) if ($debug >= 2);
+    return;
+  }
+
+  ## Reset the module error message
+  $wlan_error = qq{};
+
+  my $command  = qq{wlan connect name="$name"};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  return (1) if ($response =~ /successfully/x);
+
+  ## Set the module error message
+  $wlan_error = str_trim($response);
+  print($wlan_error, qq{\n}) if ($debug >= 2);
+
+  return;
 }
 
 ##****************************************************************************
