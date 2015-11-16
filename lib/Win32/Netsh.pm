@@ -39,7 +39,7 @@ our $VERSION = qq{0.02};
 
 ## Default path to the netsh command 
 my $__NETSH_CMD = File::Spec->catfile(
-  $ENV{WINDIR}, qq{system32}, qq{netsh.ex}
+  $ENV{WINDIR}, qq{system32}, qq{netsh.exe}
   );
 
 ##****************************************************************************
