@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.02    2015-11-16
         * In Win32::Netsh:
           + Added netsh_path() to allow setting an alternative path to the
             netsh command
