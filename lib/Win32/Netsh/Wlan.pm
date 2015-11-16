@@ -14,7 +14,7 @@ Windows netsh utility's wlan context
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -38,6 +38,7 @@ use Exporter::Easy (
   OK     => [
     qw(
       wlan_connect
+      wlan_disconnect
       wlan_interface_info_all
       wlan_interface_info
       wlan_profile_info_all
@@ -46,7 +47,7 @@ use Exporter::Easy (
       )
   ],
   TAGS => [
-    connect => [qw(wlan_connect),],
+    connect => [qw(wlan_connect wlan_disconnect),],
     debug   => [qw(wlan_debug),],
     profile => [
       qw(
@@ -957,6 +958,57 @@ sub wlan_connect
 
   return;
 }
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 wlan_disconnect()
+
+=over 2
+
+=item B<Description>
+
+Disconnect any current connection
+
+=item B<Parameters>
+
+=over 4
+
+=item I<NONE>
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<NONE>
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub wlan_disconnect
+{
+  print(qq{wlan_disconnect()\n}) if ($debug);
+
+  ## Reset the module error message
+  $wlan_error = qq{};
+
+  my $command  = qq{wlan disconnect};
+  my $response = netsh($command);
+  if ($debug >= 2)
+  {
+    print(qq{COMMAND:  [netsh $command]\n});
+    print(qq{RESPONSE: [$response]\n});
+  }
+
+  return;
+}
+
 
 ##****************************************************************************
 ## Additional POD documentation
