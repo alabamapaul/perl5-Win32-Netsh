@@ -62,7 +62,7 @@ use Exporter::Easy (
 );
 
 ## Version string
-our $VERSION = qq{0.01};
+our $VERSION = qq{0.02};
 
 my $debug = 0;
 
@@ -96,6 +96,7 @@ Readonly::Scalar my $WLAN_PROFILE_KEY_LOOKUP => {
   qq{Cipher}          => qq{cipher},
   qq{Connection mode} => qq{mode},
   qq{SSID name}       => qq{ssid},
+  qq{SSID names}      => qq{ssid},
 };
 
 ##****************************************************************************
@@ -482,7 +483,7 @@ Name of the interface
 
 =item I<ssid>
 
-SSID of the wireless network
+Array reference to the list of SSIDs of the wireless network
 
 =item I<net_type>
 
@@ -571,7 +572,7 @@ Name of the interface
 
 =item I<ssid>
 
-SSID of the wireless network
+Array reference to the list of SSIDs of the wireless network
 
 =item I<net_type>
 
@@ -645,6 +646,7 @@ sub _parse_profile_info
 {
   my $lines = shift // [];
   my $info;
+  my $last_key = qq{};
 
   print(qq{_parse_profile_info()\n}) if ($debug);
   print(Data::Dumper->Dump([$lines,], [qw(lines),]), qq{\n}) if ($debug >= 2);
@@ -667,7 +669,9 @@ PROFILE_INFO_PARSE_LOOP:
       }
 
       ## Initialize the hash
+      print(qq{  INITIALIZING HASH\n}) if ($debug);
       $info = initialize_hash_from_lookup($WLAN_PROFILE_KEY_LOOKUP);
+      $info->{ssid} = [];
       $info->{name} = $1;
       $info->{interface} = $2;
     }
@@ -675,15 +679,29 @@ PROFILE_INFO_PARSE_LOOP:
     {
       my $text  = str_trim($1);
       my $value = str_trim($2);
-      print(qq{  TEXT:  [$text]\n  VALUE: [$value]\n}) if ($debug);
-
+      print(qq{  + TEXT:  [$text]\n  + VALUE: [$value]\n}) if ($debug);
       if (my $key = get_key_from_lookup($text, $WLAN_PROFILE_KEY_LOOKUP))
       {
+        print(qq{  + KEY:   [$key]\n}) if ($debug);
         ## Remove the enclosing " for the SSID
         $value = substr($value, 1, -1) if ($key eq qq{ssid});
         $value = substr($value, 8, -2) if ($key eq qq{mode});
-        $info->{$key} = $value;
+        if (ref($info->{$key}) eq qq{ARRAY})
+        {
+          push(@{$info->{$key}}, $value);
+        }
+        else
+        {
+          $info->{$key} = $value;
+        }
+        $last_key = $key;
       }
+    }
+    elsif (($last_key eq qq{ssid}) and ($line =~ /"([^"]*)"/x))
+    {
+      my $ssid = $1;
+      print(qq{  + VALUE: [$ssid]\n  + KEY:   [$last_key]\n}) if ($debug);
+      push(@{$info->{$last_key}}, $ssid);
     }
   }
 
