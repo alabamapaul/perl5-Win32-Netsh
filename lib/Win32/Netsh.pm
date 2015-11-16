@@ -14,7 +14,7 @@ insterface of a Windows based PC using the netsh utility
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -30,10 +30,17 @@ use strict;
 use warnings;
 use 5.010;
 use Carp;
-use Exporter::Easy (EXPORT => [qw(netsh)],);
+use File::Spec;
+use Exporter::Easy (EXPORT => [qw(netsh netsh_path can_netsh)],);
 
 ## Version string
-our $VERSION = qq{0.01};
+our $VERSION = qq{0.02};
+
+
+## Default path to the netsh command 
+my $__NETSH_CMD = File::Spec->catfile(
+  $ENV{WINDIR}, qq{system32}, qq{netsh.ex}
+  );
 
 ##****************************************************************************
 ##****************************************************************************
@@ -71,7 +78,7 @@ sub netsh    ## no critic (RequireArgUnpacking)
   }
 
   ## Build the command
-  my $command = qq{netsh};
+  my $command = $__NETSH_CMD;
   foreach my $arg (@_)
   {
     $command .= qq{ } . $arg;
@@ -83,6 +90,106 @@ sub netsh    ## no critic (RequireArgUnpacking)
   ## return the result
   return ($result);
 }
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 can_netsh()
+
+=over 2
+
+=item B<Description>
+
+Verify that the netsh can be found and executed
+
+=item B<Parameters>
+
+NONE
+
+=item B<Return>
+
+UNDEF on error, or 1 for success
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub can_netsh
+{
+
+  ## Make sure this is a Windows box
+  unless ($^O eq qq{MSWin32})
+  {
+    print(
+      qq{Win32::Netsh is intended for use on }, 
+      qq{Microsoft Windows platforms only!\n}
+    );
+    return;
+  }
+
+  ## Execute command and capture output
+  my $output = qx{$__NETSH_CMD help > NUL 2>&1};    ## no critic (ProhibitBacktick)
+  
+  ## Get the result of the last command 
+  if (my $error = ($? >> 8))
+  {
+    print(qq{Could not locate the command "$__NETSH_CMD"!\n});
+    return;
+  }
+
+  ## return success
+  return(1);
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 netsh_path($path)
+
+=over 2
+
+=item B<Description>
+
+Set the complete path to the netsh command. Typically the command is in the
+path, but this function can be used to specify a location to use.
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$path>
+
+Complete path, including the .exe extension.
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<SCALAR>
+
+String containing the complete path to the netsh command
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub netsh_path
+{
+  my $path = shift // qq{};
+
+  ## Set the path (if provided)
+  $__NETSH_CMD = $path if ($path);
+  
+  ## Return the current path
+  return($__NETSH_CMD);
+}
+
 
 ##****************************************************************************
 ## Additional POD documentation
