@@ -55,6 +55,8 @@ my @CommandLineOptions = (
   "add-profile=s@",
   "delete-profile=s@",
   "ipv4=s@",
+  "connect=s",
+  "disconnect!",
   
 );
 #>>>  perltidy - stop ignoring
@@ -78,6 +80,8 @@ my %gOptions = (
   'list-interface'   => 0,
   'list-wlan'        => 0,
   'list-profile'     => 0,
+  connect            => qq{},
+  disconnect         => 0,
 );
 
 ##----------------------------------------------------------------------------
@@ -279,6 +283,33 @@ if (scalar(@{$gOptions{'add-profile'}}))
 }
 
 ##---------------------------------------------
+## Connect to a wireless profile
+##---------------------------------------------
+if ($gOptions{connect})
+{
+  print(qq{Connecting to wireless profile "$gOptions{connect}"...});
+  if (wlan_connect($gOptions{connect}))
+  {
+    print(qq{DONE\n});
+  }
+  else
+  {
+    print(qq{ERROR: }, wlan_last_error(), qq{\n});
+  }
+}
+
+##---------------------------------------------
+## Disconnect from wireless
+##---------------------------------------------
+if ($gOptions{disconnect})
+{
+  print(qq{Disconnecting wireless...});
+  wlan_disconnect();
+  print(qq{ DONE\n});
+}
+
+
+##---------------------------------------------
 ## Delete wireless profiles
 ##---------------------------------------------
 if (scalar(@{$gOptions{'delete-profile'}}))
@@ -404,6 +435,8 @@ B<netsh_dev_tests.pl> {B<--help>}
 {B<--list-profile>}
 {B<--add-profile> I<WirelessProfileFilename>}
 {B<--delete-profile> I<WirelessProfileName>}
+{B<--connect> I<WirelessProfileName>}
+{B<--disconnect>}
   
 =head1 OPTIONS
 
@@ -460,6 +493,14 @@ Multiple --add-profile parameters can be provided
 Delete the specified wireless profile 
 
 Multiple --delete-profile parameters can be provided
+
+=item B<--connect> I<WirelessProfileName>
+
+Connect to the specified wireless profile 
+
+=item B<--disconnect>
+
+Disconnect any wireless connection 
 
 =item B<--help>
 
