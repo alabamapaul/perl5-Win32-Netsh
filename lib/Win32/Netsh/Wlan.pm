@@ -878,8 +878,6 @@ Return the error string associated with the last wlan command
 
 NONE
 
-=back
-
 =item B<Return>
 
 SCALAR - error string

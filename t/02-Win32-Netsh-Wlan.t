@@ -104,6 +104,8 @@ foreach my $test_profile (@test_profiles)
   ## Build the filename
   my $filename = File::Spec->catfile(
       File::Spec->splitdir(dirname(__FILE__)), 
+      qq{..},
+      qq{xt},
       $test_profile->{filename}
       );
   ## Add the profile
