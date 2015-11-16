@@ -1,7 +1,7 @@
 ##----------------------------------------------------------------------------
 ## :mode=perl:indentSize=2:tabSize=2:noTabs=true:
 ##----------------------------------------------------------------------------
-##        File: 00-Win32-Netsh-Interface.t
+##        File: 01-Win32-Netsh-Interface.t
 ## Description: Test script for Win32::Netsh::Interface
 ##----------------------------------------------------------------------------
 use strict;
