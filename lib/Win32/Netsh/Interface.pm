@@ -14,7 +14,7 @@ Windows netsh utility's interface context
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -48,7 +48,7 @@ use Exporter::Easy (
 );
 
 ## Version string
-our $VERSION = qq{0.01};
+our $VERSION = qq{0.02};
 
 ##-------------------------------------------------
 ## Module variables
@@ -519,13 +519,16 @@ sub interface_info_all
   foreach my $line (split(qq{\n}, $response))
   {
     ## Parse each line
-    if ($line =~ /\A(Enabled|Disabled)\s+(\S+?)\s+(\S+)\s+(.*)\Z/x)
+    if ($line =~ /\A(Enabled|Disabled)/x)
     {
+      ## Originally used a RegEx, but found XP did not provide data in the 
+      ## "State" column, so now using substr() to parse out the 
+      my $enabled = 
       my $info = {
-        enabled => ((uc($1) eq qq{ENABLED}) ? 1 : 0),
-        state   => $2,
-        type    => $3,
-        name    => str_trim($4),
+        enabled => ((uc(str_trim(substr($line, 0, 15))) eq qq{ENABLED}) ? 1 : 0),
+        state   => str_trim(substr($line, 15, 15)),
+        type    => str_trim(substr($line, 30, 17)),
+        name    => str_trim(substr($line, 47)),
       };
 
       push(@{$all}, $info);
