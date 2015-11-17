@@ -14,7 +14,7 @@ insterface of a Windows based PC using the netsh utility
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =head1 SYNOPSIS
 
@@ -34,7 +34,7 @@ use File::Spec;
 use Exporter::Easy (EXPORT => [qw(netsh netsh_path can_netsh netsh_context_found)],);
 
 ## Version string
-our $VERSION = qq{0.03};
+our $VERSION = qq{0.04};
 
 
 ## Default path to the netsh command 
