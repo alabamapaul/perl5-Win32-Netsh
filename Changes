@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+0.04    2015-11-17
+        * Bumped version of Win32::Netsh
+        * In Win32::Netsh::Interface, corrected problem when calling 
+          interface_info_all() on Windows XP
+          
 0.03    2015-11-17
         * In Win32::Netsh:
           + Added netsh_context_found() to determine if a context is supported
