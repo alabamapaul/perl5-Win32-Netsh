@@ -14,7 +14,7 @@ insterface of a Windows based PC using the netsh utility
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =head1 SYNOPSIS
 
@@ -31,10 +31,10 @@ use warnings;
 use 5.010;
 use Carp;
 use File::Spec;
-use Exporter::Easy (EXPORT => [qw(netsh netsh_path can_netsh)],);
+use Exporter::Easy (EXPORT => [qw(netsh netsh_path can_netsh netsh_context_found)],);
 
 ## Version string
-our $VERSION = qq{0.02};
+our $VERSION = qq{0.03};
 
 
 ## Default path to the netsh command 
@@ -188,6 +188,53 @@ sub netsh_path
   
   ## Return the current path
   return($__NETSH_CMD);
+}
+
+##****************************************************************************
+##****************************************************************************
+
+=head2 netsh_context_found($context)
+
+=over 2
+
+=item B<Description>
+
+Determine if the given netsh context is supported on this system.
+
+=item B<Parameters>
+
+=over 4
+
+=item I<$context>
+
+Context to examine (for example "wlan").
+
+=back
+
+=item B<Return>
+
+=over 4
+
+=item I<SCALAR>
+
+UNDEF if context is not supported, or 1 if context is supported
+
+=back
+
+=back
+
+=cut
+
+##----------------------------------------------------------------------------
+sub netsh_context_found
+{
+  my $context = shift;
+  
+  my $response = netsh(qq{$context ?});
+
+  return if ($response =~ /was \s not \s found/x);
+  
+  return(1);
 }
 
 
