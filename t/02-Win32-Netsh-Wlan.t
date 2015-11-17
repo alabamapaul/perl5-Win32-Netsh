@@ -15,8 +15,19 @@ BEGIN {
   
   unless ($^O eq qq{MSWin32})
   {
-    Test::More::plan(skip_all => 'Win32::Netsh::Wlan is for MSWin32 only');
+    Test::More::plan(skip_all => qq{Win32::Netsh::Wlan is for MSWin32 only});
   }
+  
+  require Win32::Netsh;
+  unless (Win32::Netsh::netsh_context_found(qq{wlan}))
+  {
+    Test::More::plan(
+      skip_all => qq{WLAN context not supported on this system.}
+    );
+  }
+  
+  use_ok(qq{Win32::Netsh::Wlan}, (qw(:all)));
+
 }
 
 ##---------------------------------------
@@ -56,7 +67,7 @@ my @test_profiles = (
 ##---------------------------------------
 ## Use the module
 ##---------------------------------------
-use_ok(qq{Win32::Netsh::Wlan}, (qw(:all)));
+
 
 ##---------------------------------------
 ## Test wlan interface related calls
