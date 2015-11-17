@@ -1,5 +1,12 @@
 {{$NEXT}}
 
+0.03    2015-11-17
+        * In Win32::Netsh:
+          + Added netsh_context_found() to determine if a context is supported
+            on the system
+        * Updated Win32::Netsh::Wlan tests skip all tests if the wlan context
+          was not supported.
+          
 0.02    2015-11-16
         * In Win32::Netsh:
           + Added netsh_path() to allow setting an alternative path to the
