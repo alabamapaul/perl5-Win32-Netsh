@@ -5,3 +5,4 @@
 ## Dzil artifacts
 .build
 *.tmp
+Win32-Netsh-*
