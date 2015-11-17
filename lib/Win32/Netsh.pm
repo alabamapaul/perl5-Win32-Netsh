@@ -10,7 +10,7 @@ package Win32::Netsh;
 =head1 NAME
 
 Win32::Netsh - A family of modules for querying and manipulating the network
-insterface of a Windows based PC using the netsh utility
+interfaces of a Windows based PC using the netsh utility
 
 =head1 VERSION
 
